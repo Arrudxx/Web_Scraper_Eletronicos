@@ -93,12 +93,12 @@ def Extrai_Dados(site, produto):
     #Faz o fetch da pagina
     scraper.fetch_page()
 
-
+    #Extração dos dados
     lista_produtos = scraper.extract_text_by_class(class_name='sc-d79c9c3f-0 nlmfp sc-93fa31de-16 bBOYrL nameCard', element="span")
-
     lista_preco = scraper.extract_text_by_class(class_name='sc-6889e656-2 bYcXfg priceCard', element="span")
-
     lista_links = scraper.extract_text_by_xpath(xpath = [f'//*[@id="listing"]/div[3]/div/div/div[2]/div[1]/main/div[{i}]/a' for i in range(1, 101)])
+
+
 
     #Arruma o link transformando em uma url completa
     lista_links = [f"https://www.{site}.com.br/{item}" for item in lista_links]
@@ -118,7 +118,6 @@ def Extrai_Dados(site, produto):
 
     # Remover tuplas onde o primeiro item não contém a variavel produto
     dados_combinados_filtrados = [tupla for tupla in dados_combinados if produto in tupla[0].upper()]
-
 
     scraper.inserir_tabela_produto(dados_combinados_filtrados)
 
