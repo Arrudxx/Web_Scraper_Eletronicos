@@ -29,5 +29,6 @@ class ScrapyPichau(scrapy.Spider):
         
         props=json.loads(response.xpath('//script[@id="__NEXT_DATA__"]//text()').get())
         houses = props.get("props").get("pageProps")
-        print(houses)
+        #print(houses)
+
         #return super().parse(response, **kwargs)
