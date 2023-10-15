@@ -1,144 +1,76 @@
-import pandas as pd
-import selenium
-import WebScraper
-from datetime import datetime
-import sqlite3
-import re
+import json
+import DataBase
+from datetime import datetime, timedelta
+import os
+import shutil
+import subprocess
 
-
-
-data_atual = str(datetime.today().date())
-
-def Gera_Url(site, produto) -> str:
+#A FAZER
+    #! Remover kabum do metodo database
+    #! adicionar site ao dicionario antes
+    #! Arruma problemas com este dicionario
     
-    #Trata caso se vim com mais de 1 espaco
-    produto = produto.split()
-    produto = ' '.join(produto)
 
-    #Substitui o espaco por -
-    produto = produto.replace(" ", "-")
+def run_scrapy_spider() -> None:
+    project_dir = "scrapy_kabum\scrapy_kabum"  # Substitua pelo caminho real do seu projeto
+    spider_name = "spider_kabum"
 
-    if site == "Kabum":
+    # Mude o diretório de trabalho para o diretório do projeto Scrapy
+    os.chdir(project_dir)
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Referer': f'https://www.kabum.com.br/busca/{produto}?page_number=1&page_size=100&facet_filters=&sort=most_searched',  # Altere isso para a página de referência real
-            'Cache-Control': 'max-age=0',
-        }
+    command = "scrapy crawl spider_kabum -o output.json"
+    subprocess.run(command, shell=True)
 
-        link = rf"https://www.kabum.com.br/busca/{produto}?page_number=1&page_size=100&facet_filters=&sort=most_searched"
-
-    elif site == "Terabyte":
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Referer': f'https://www.terabyteshop.com.br/busca?str={produto}',  # Altere isso para a página de referência real
-            'Cache-Control': 'max-age=0',
-        }
-
-    elif site == "Pichau":
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Referer': f'https://www.pichau.com.br/search?q={produto}',  # Altere isso para a página de referência real
-            'Cache-Control': 'max-age=0',
-        }
-
-        link = rf"https://www.pichau.com.br/search?q={produto}"
-
-    elif site == "Amazon":
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Referer': f'https://www.amazon.com.br/s?k={produto}',  # Altere isso para a página de referência real
-            'Cache-Control': 'max-age=0',
-        }
-
-        link = rf"https://www.amazon.com.br/s?k={produto}"
+    #Se existir o arquivo apaga ele
+    if os.path.exists(rf'{os.getcwd()}\json\output.json'):
+        os.remove(rf'{os.getcwd()}\json\output.json')
 
 
-    return link, headers
+    #Move o arquivo para a pasta Json
+    print(os.getcwd())
+    if os.path.exists(rf'{os.getcwd()}\output.json'):
+        shutil.move(rf'{os.getcwd()}\output.json', rf'{os.getcwd()}\json\output.json')
 
+def Treats_json():
 
-def Extrai_Dados(site, produto):
+    # try:
+    with open(rf'{os.getcwd()}\scrapy_kabum\scrapy_kabum\json\output.json', 'r', encoding='utf-8') as json_file:
 
-    #Deixa o nome do produto em maiusculo
-    produto = produto.upper()
+        # Lê todas as linhas do arquivo
+        linhas = json_file.readlines()
 
-    #Gera o url do da pesquisa
-    link, header = Gera_Url(site=site, produto=produto)
+        # Se a primeira linha contiver apenas '[', remova-a
+        if linhas and linhas[0].strip() == '[':
+            linhas = linhas[1:]
+        
+        # Itera sobre cada linha do arquivo
+        for linha in linhas:
 
-    scraper = WebScraper.WebScraper(url=link, nome_banco= r"C:\Users\Daniel\Documents\Meu\Outros\webscraper\DataBase.db", header=header)
-
-    #Faz o fetch da pagina
-    scraper.fetch_page()
-
-    #Extração dos dados
-    lista_produtos = scraper.extract_text_by_class(class_name='sc-d79c9c3f-0 nlmfp sc-93fa31de-16 bBOYrL nameCard', element="span")
-    lista_preco = scraper.extract_text_by_class(class_name='sc-6889e656-2 bYcXfg priceCard', element="span")
-    lista_links = scraper.extract_text_by_xpath(xpath = [f'//*[@id="listing"]/div[3]/div/div/div[2]/div[1]/main/div[{i}]/a' for i in range(1, 101)])
-
-
-
-    #Arruma o link transformando em uma url completa
-    lista_links = [f"https://www.{site}.com.br/{item}" for item in lista_links]
-
-
-    #retira todos os erros em lista_preco
-    lista_preco = [item.replace("R$", "").replace(".", "").replace(",", ".").replace(",", ".").replace('', '') for item in lista_preco]
-    lista_preco = [re.sub(r'[^ -~]', '', item) for item in lista_preco]
-    lista_preco = [float(item) for item in lista_preco]
-    
-    # Replicar os valores de site e data_atual para corresponder ao comprimento das outras listas
-    lista_site = [site] * len(lista_produtos)
-    lista_data_atual = [data_atual] * len(lista_produtos)
-
-    # Combinacão em um único array de tuplas
-    dados_combinados = list(zip(lista_produtos, lista_preco, lista_site,lista_links, lista_data_atual))
-
-    # Remover tuplas onde o primeiro item não contém a variavel produto
-    dados_combinados_filtrados = [tupla for tupla in dados_combinados if produto in tupla[0].upper()]
-
-    scraper.inserir_tabela_produto(dados_combinados_filtrados)
-
+            # Remove o caractere de nova linha (\n) no final de cada linha
+            linha = linha.rstrip(',\n')
+            linha = linha.rstrip('')
+            # Carrega a linha como um objeto JSON (dicionário)
+            dict_linha = json.loads(linha)
+            
+            my_db.insert_table_product(dict_linha)
 
 
 
 if __name__ == "__main__":
-    Extrai_Dados("Kabum", "Placa de Vídeo RTX 4070")
+    my_db = DataBase.DataBase(bank_name=r"C:\Users\Daniel\Documents\Meu\Outros\webscraper\DataBase.db")
 
+    #run_scrapy_spider()
+    
+    for dicionario in Treats_json():
+        # Chame a função insert_table_product para cada dicionário
+        my_db.insert_table_product(**dicionario)
 
+        
 
+        # print(data_generator)
 
+    # except Exception as e:
+    #     print(f"Erro ao ler e inserir no banco de dados: {e}")
 
-
-
-
-
-
-
-
-
-
-
+#DataBase = DataBase.DataBase(name_bank="database.db")
 
