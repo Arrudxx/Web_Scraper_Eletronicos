@@ -24,6 +24,7 @@ class DataBase:
                     Valor FLOAT,
                     Site TEXT,
                     Link TEXT,
+                    Categoria TEXT,
                     Data TEXT,
                     Hora TEXT
                 )
@@ -41,6 +42,7 @@ class DataBase:
         value = data_list.get('price', None)
         site = site
         link = data_list.get('link', None)
+        category = data_list.get('category', None)
         data_current = data_list.get('data', None)
         hour_current = data_list.get('hora', None)
 
@@ -54,8 +56,8 @@ class DataBase:
                 value = None
 
         self.cursor.execute('''
-            INSERT INTO Produtos (Produto, Valor, Site, Link, Data, Hora)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (product, value, site, link, data_current, hour_current))
+            INSERT INTO Produtos (Produto, Valor, Site, Link, Categoria, Data, Hora)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (product, value, site, link, category, data_current, hour_current))
 
         self.connection.commit()

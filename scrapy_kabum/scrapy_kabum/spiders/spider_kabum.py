@@ -55,6 +55,7 @@ class SpiderKabumSpider(scrapy.Spider):
                 'title': name,
                 'price': value,
                 'link': link,
+                "category":category,
                 'data': str(datetime.today().date()),
                 'hora': (datetime.now()).strftime("%H:%M:%S")
             }
