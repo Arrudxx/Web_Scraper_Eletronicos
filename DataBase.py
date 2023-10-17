@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from lxml import html
 import json
+import re
 
 class DataBase:
     def __init__(self,bank_name = "database.db") -> None:
@@ -13,6 +14,7 @@ class DataBase:
         self.cursor = None
         self.connect()
         self.crate_table_product()
+
 
     def crate_table_product(self):
         self.cursor.execute('''
@@ -27,21 +29,17 @@ class DataBase:
                 )
             ''')
 
+
     def connect(self) -> None:
         self.connection = sqlite3.connect(self.bank_name)
         self.cursor = self.connection.cursor()
 
 
-
-
-    def insert_table_product(self, data_list):
-
-
-
+    def insert_table_product(self, data_list, site):
 
         product = data_list.get('title', None)
         value = data_list.get('price', None)
-        site = "kabum"
+        site = site
         link = data_list.get('link', None)
         data_current = data_list.get('data', None)
         hour_current = data_list.get('hora', None)
@@ -49,6 +47,8 @@ class DataBase:
         # Verifica se o valor é um número de ponto flutuante e converte se necessário
         if value is not None:
             try:
+                value = re.sub(r'[^\d,.]', '', value)
+                value = value.replace('.', '').replace(',', '.')
                 value = float(value)
             except ValueError:
                 value = None

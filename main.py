@@ -4,16 +4,13 @@ from datetime import datetime, timedelta
 import os
 import shutil
 import subprocess
+import time
 
-#A FAZER
-    #! Remover kabum do metodo database
-    #! adicionar site ao dicionario antes
-    #! Arruma problemas com este dicionario
-    
 
 def run_scrapy_spider() -> None:
-    project_dir = "scrapy_kabum\scrapy_kabum"  # Substitua pelo caminho real do seu projeto
-    spider_name = "spider_kabum"
+    run_current = os.getcwd()
+    project_dir = "scrapy_kabum\scrapy_kabum"
+    #spider_name = "spider_kabum"
 
     # Mude o diretório de trabalho para o diretório do projeto Scrapy
     os.chdir(project_dir)
@@ -27,9 +24,12 @@ def run_scrapy_spider() -> None:
 
 
     #Move o arquivo para a pasta Json
-    print(os.getcwd())
+    #print(os.getcwd())
     if os.path.exists(rf'{os.getcwd()}\output.json'):
         shutil.move(rf'{os.getcwd()}\output.json', rf'{os.getcwd()}\json\output.json')
+
+    #Retorna para o diretorio inicial
+    os.chdir(run_current)
 
 def Treats_json():
 
@@ -39,38 +39,39 @@ def Treats_json():
         # Lê todas as linhas do arquivo
         linhas = json_file.readlines()
 
-        # Se a primeira linha contiver apenas '[', remova-a
-        if linhas and linhas[0].strip() == '[':
-            linhas = linhas[1:]
         
         # Itera sobre cada linha do arquivo
         for linha in linhas:
-
-            # Remove o caractere de nova linha (\n) no final de cada linha
-            linha = linha.rstrip(',\n')
-            linha = linha.rstrip('')
-            # Carrega a linha como um objeto JSON (dicionário)
-            dict_linha = json.loads(linha)
             
-            my_db.insert_table_product(dict_linha)
+            # Verificar se a linha contém '[' ou ']'
+            if '[' not in linha and ']' not in linha:
+
+                # Remove o caractere de nova linha (\n) no final de cada linha
+                linha = linha.rstrip(',\n')
+                # Carrega a linha como um objeto JSON (dicionário)
+                dict_linha = json.loads(linha)
+                
+                my_db.insert_table_product(dict_linha, site="Kabum")
 
 
 
 if __name__ == "__main__":
+
+    # Registra o tempo de início
+    inicio = time.time()
+
     my_db = DataBase.DataBase(bank_name=r"C:\Users\Daniel\Documents\Meu\Outros\webscraper\DataBase.db")
 
-    #run_scrapy_spider()
-    
-    for dicionario in Treats_json():
-        # Chame a função insert_table_product para cada dicionário
-        my_db.insert_table_product(**dicionario)
+    run_scrapy_spider()
 
-        
+    Treats_json()
 
-        # print(data_generator)
+    # Registra o tempo de término
+    fim = time.time()
 
-    # except Exception as e:
-    #     print(f"Erro ao ler e inserir no banco de dados: {e}")
+    # Calcula o tempo total de execução
+    tempo_total = fim - inicio
 
-#DataBase = DataBase.DataBase(name_bank="database.db")
+    print(f"Tempo de execução: {tempo_total} segundos")
+
 
