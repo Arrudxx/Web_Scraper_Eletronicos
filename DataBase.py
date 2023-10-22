@@ -46,14 +46,6 @@ class DataBase:
         data_current = data_list.get('data', None)
         hour_current = data_list.get('hora', None)
 
-        # Verifica se o valor é um número de ponto flutuante e converte se necessário
-        if value is not None:
-            try:
-                value = re.sub(r'[^\d,.]', '', value)
-                value = value.replace('.', '').replace(',', '.')
-                value = float(value)
-            except ValueError:
-                value = None
 
         self.cursor.execute('''
             INSERT INTO Produtos (Produto, Valor, Site, Link, Categoria, Data, Hora)

@@ -52,10 +52,11 @@ class SpiderKabumSpider(scrapy.Spider):
             cod_produto = dado.get("code")
 
             #tratamento de alguns casos que não estão em oferta para retornar o preço
-            offer = dado.get("offer")
-            if offer == None:
+            verif_offer = dado.get("offer")
+            if verif_offer != None:
+                offer = dado.get("offer").get("priceWithDiscount")
+            else:
                 offer = dado.get("priceWithDiscount")
-
 
             yield{
                 "title" : name,
