@@ -1,6 +1,6 @@
 import scrapy
 from datetime import datetime
-
+import json
 
 
 class SpiderKabumSpider(scrapy.Spider):
@@ -39,28 +39,58 @@ class SpiderKabumSpider(scrapy.Spider):
         if not category:
             self.log('Erro: category não foi passado corretamente.')
 
-        products_cards = response.xpath('//div[@class="sc-93fa31de-7 gopyRO productCard"]')
+        #Pega os dados do json __NEXT_DATA__
+        html = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text( )').get())
+        
+        #Entra no json até a parte de dados
+        props = html.get("props").get("pageProps").get("data")
+        dados = json.loads(props).get("catalogServer").get("data")
 
-        for product_card in products_cards:
-            # Crie um objeto Selector para o produto card
-            product_selector = scrapy.Selector(text=product_card.get())
+        #Quando acha o dict de dados faz um for pegando as informações
+        for dado in dados:
+            name = dado.get("name")
+            cod_produto = dado.get("code")
 
-            #Seleciona o que precisa selecionar
-            name = product_selector.xpath(".//h2/span/text()").get()
-            value = product_selector.xpath('.//a/div/div[1]/span[2]/text()').get()
-            link = product_selector.xpath('.//a/@href').get()
-            
-            # Armazenar as informações em um dicionário
-            product_info = {
-                'title': name,
-                'price': value,
-                'link': link,
+            #tratamento de alguns casos que não estão em oferta para retornar o preço
+            offer = dado.get("offer")
+            if offer == None:
+                offer = dado.get("priceWithDiscount")
+
+
+            yield{
+                "title" : name,
+                "price" : offer,
+                "link": f"https://www.kabum.com.br/produto/{cod_produto}",
                 "category":category,
                 'data': str(datetime.today().date()),
                 'hora': (datetime.now()).strftime("%H:%M:%S")
             }
 
-            yield product_info
+        # products_cards = response.xpath('//div[@class="sc-93fa31de-7 gopyRO productCard"]')
+
+        # for product_card in products_cards:
+        #     # Crie um objeto Selector para o produto card
+        #     product_selector = scrapy.Selector(text=product_card.get())
+
+            
+
+
+        #     #Seleciona o que precisa selecionar
+        #     name = product_selector.xpath(".//h2/span/text()").get()
+        #     value = product_selector.xpath('.//a/div/div[1]/span[2]/text()').get()
+        #     link = product_selector.xpath('.//a/@href').get()
+            
+        #     # Armazenar as informações em um dicionário
+        #     product_info = {
+        #         'title': name,
+        #         'price': value,
+        #         'link': link,
+        #         "category":category,
+        #         'data': str(datetime.today().date()),
+        #         'hora': (datetime.now()).strftime("%H:%M:%S")
+        #     }
+
+        #     yield product_info
         
         # Obter o número da página atual da URL
         current_page = int(response.url.split('page_number=')[1].split('&')[0])
