@@ -6,6 +6,11 @@ import shutil
 import subprocess
 import time
 import logging
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
+api_key = os.getenv("WEBSCRAPING_FIREBASE_KEY")
 
 # Configuração do nível de log para CRITICAL
 logging.getLogger('scrapy').setLevel(logging.CRITICAL)
