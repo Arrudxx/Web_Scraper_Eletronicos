@@ -1,0 +1,5 @@
+#ignora os arquivos e testes
+test.py
+
+#ignora .env
+.env
