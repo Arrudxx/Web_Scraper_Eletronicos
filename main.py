@@ -91,7 +91,7 @@ if __name__ == "__main__":
     db_firebase = Firebase_DataBase.FireBase_DataBase(api_key)
 
     #Roda a spider
-    #run_scrapy_spider()
+    run_scrapy_spider()
 
     #Trata e joga no sqlite
     Treats_json()
