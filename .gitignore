@@ -3,3 +3,6 @@ test.py
 
 #ignora .env
 .env
+
+#ignora output.json
+.scrapy_kabum\scrapy_kabum\json\output.json

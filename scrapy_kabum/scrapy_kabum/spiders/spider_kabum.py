@@ -1,6 +1,13 @@
 import scrapy
 from datetime import datetime
 import json
+import logging
+# Configuração do nível de log para CRITICAL
+logging.getLogger('scrapy').setLevel(logging.CRITICAL)
+# Configuração do nível de log para CRITICAL
+logging.CRITICAL
+# Configuração do nível de log
+logging.getLogger('scrapy').setLevel(logging.ERROR)
 
 
 class SpiderKabumSpider(scrapy.Spider):
@@ -26,6 +33,8 @@ class SpiderKabumSpider(scrapy.Spider):
     def parse(self, response):
         # Obtem o número total de páginas
         total_page = int(response.xpath('//*[@id="listingPagination"]/ul/li[last()-1]/a/text()').get())
+
+        
 
         # Limita a 10 páginas no máximo
         if total_page < 10:

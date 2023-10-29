@@ -9,11 +9,9 @@ import logging
 import Firebase_DataBase
 from dotenv import load_dotenv
 
-
-
-
 # Configuração do nível de log para CRITICAL
 logging.getLogger('scrapy').setLevel(logging.CRITICAL)
+
 
 def run_scrapy_spider() -> None:
     run_current = os.getcwd()
