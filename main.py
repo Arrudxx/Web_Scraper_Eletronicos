@@ -6,11 +6,11 @@ import shutil
 import subprocess
 import time
 import logging
+import Firebase_DataBase
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
 
-api_key = os.getenv("WEBSCRAPING_FIREBASE_KEY")
+
 
 # Configuração do nível de log para CRITICAL
 logging.getLogger('scrapy').setLevel(logging.CRITICAL)
@@ -59,20 +59,47 @@ def Treats_json():
                 # Carrega a linha como um objeto JSON (dicionário)
                 dict_linha = json.loads(linha)
                 
-                my_db.insert_table_product(dict_linha, site="Kabum")
+                db_sqlite.insert_table_product(dict_linha, site="Kabum")
 
+def Post_Firebase():
+
+    
+
+    # Obtém a data e hora atuais
+    agora = datetime.now()
+    data_hora_formatada = agora.strftime(r"%Y-%m-%d %H:%M:%S")
+
+    # Leitura do arquivo e processamento de cada JSON
+    with open(rf'{os.getcwd()}\scrapy_kabum\scrapy_kabum\json\output.json', 'r', encoding="utf-8 sig") as json_file:
+
+        data_list = json.load(json_file)
+
+        db_firebase.enviar_requisicoes(data_list, n_threads=8)
 
 
 if __name__ == "__main__":
 
+    
+    load_dotenv(override=True)
+    api_key = os.getenv("WEBSCRAPING_FIREBASE_KEY")
+
     # Registra o tempo de início
     inicio = time.time()
 
-    my_db = DataBase.DataBase(bank_name=r"C:\Users\Daniel\Documents\Meu\Outros\webscraper\DataBase.db")
+    #Instancia as classes de db
+    db_sqlite = DataBase.DataBase(bank_name=r"C:\Users\Daniel\Documents\Meu\Outros\webscraper\DataBase.db")
+    db_firebase = Firebase_DataBase.FireBase_DataBase(api_key)
 
-    run_scrapy_spider()
+    #Roda a spider
+    #run_scrapy_spider()
 
+    #Trata e joga no sqlite
     Treats_json()
+
+    #faz o post no firebase
+    #Post_Firebase()
+
+
 
     # Registra o tempo de término
     fim = time.time()
